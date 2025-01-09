@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品与部署位置选择</title>
+    <style>
+        .combination {
+            margin-bottom: 10px;
+        }
+        .combination select {
+            margin-right: 10px;
+        }
+        #add-combination {
+            margin-bottom: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #image-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        #image-container img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>选择产品与部署位置</h1>
+    <form id="combination-form" method="post">
+        <div id="combinations-container">
+            <!-- 动态添加的组合会插入到这里 -->
+        </div>
+        <button type="button" id="add-combination">添加组合</button>
+        <button type="submit">提交</button>
+    </form>
+
+    <!-- 用于显示 PNG 图片的区域 -->
+    <div id="result">
+        <h2>生成的 PNG 图片</h2>
+        <div id="image-container">
+            <p>图片将在此处显示</p>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            "WAF", "天擎-终端防护及检测响应-EPP/EDR", "椒图-主机安全", "NGSOC-安全运营平台", 
+            "天眼-流量探针", "准入-NAC", "天眼-沙箱", "威胁情报-TIP", "SOAR", 
+            "SWG-安全代理网关", "NBM-上网行为管理", "代码安全", "NGFW", "IDS", "IPS", 
+            "邮件服务器", "邮件安全网关", "数据库", "核心交换机", "云", "云服务", 
+            "云查杀", "电脑", "笔记本", "网关", "防火墙", "服务器", "天擎客户端", "漏扫"
+        ];
+
+        const locations = [
+            "互联网", "DMZ", "交换区", "安全管理区", "业务应用区", "园区网"
+        ];
+
+        let combinationCount = 0;
+
+        // 添加组合
+        document.getElementById('add-combination').addEventListener('click', () => {
+            if (combinationCount >= 100) {
+                alert("最多只能添加 100 个组合！");
+                return;
+            }
+
+            const container = document.getElementById('combinations-container');
+            const combination = document.createElement('div');
+            combination.className = 'combination';
+
+            // 产品选择
+            const productSelect = document.createElement('select');
+            productSelect.name = `product_${combinationCount}`;
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.text = product;
+                productSelect.appendChild(option);
+            });
+
+            // 部署位置选择
+            const locationSelect = document.createElement('select');
+            locationSelect.name = `location_${combinationCount}`;
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.text = location;
+                locationSelect.appendChild(option);
+            });
+
+            // 删除按钮
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'delete-combination';
+        deleteButton.textContent = '删除';
+        deleteButton.addEventListener('click', () => {
+            container.removeChild(combination);  // 删除组合
+            combinationCount--;  // 更新组合计数
+        });
+
+            combination.appendChild(productSelect);
+            combination.appendChild(locationSelect);
+            combination.appendChild(deleteButton);
+            container.appendChild(combination);
+
+            combinationCount++;
+        });
+
+        // 提交表单
+        document.getElementById('combination-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {};
+
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // 发送数据到后端
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    // 清空图片容器
+                    const imageContainer = document.getElementById('image-container');
+                    imageContainer.innerHTML = '';  // 清空内容
+
+                    // 创建并插入 PNG 图片
+                    const pngImage = document.createElement('img');
+                    pngImage.src = `data:image/png;base64,${result.png_image}`;  // 设置 src 属性
+                    pngImage.style.maxWidth = '100%';  // 设置图片样式
+                    imageContainer.appendChild(pngImage);  // 插入图片
+                } else {
+                    alert('提交失败！');
+                }
+            })
+            .catch(error => {
+                console.error('提交失败:', error);
+            });
+        });
+    </script>
+</body>
+</html>
