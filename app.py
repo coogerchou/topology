@@ -47,6 +47,7 @@ def submit():
 # 你的生成图片函数
 def generate_images(user_input):
     excel_path = os.path.join('data', 'topology-entry.xlsx')
+    print(excel_path)
 
     def get_df(excel_path):
         
