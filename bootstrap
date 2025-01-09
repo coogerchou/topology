@@ -1,0 +1,10 @@
+#!/bin/bash
+# 安装 pip
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3 get-pip.py
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 启动应用
+gunicorn app:app -b 0.0.0.0:9000
