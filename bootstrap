@@ -1,10 +1,21 @@
 #!/bin/bash
-# 安装 pip
+# 安装 Python 和 pip
+echo "Installing Python and pip..."
+
+# 下载并安装 pip
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
 
-# 安装依赖
+# 检查 pip 是否安装成功
+if ! command -v pip &> /dev/null; then
+    echo "Error: pip installation failed!"
+    exit 1
+fi
+
+# 安装项目依赖
+echo "Installing dependencies from requirements.txt..."
 pip install -r requirements.txt
 
 # 启动应用
+echo "Starting Flask application..."
 gunicorn app:app -b 0.0.0.0:9000
