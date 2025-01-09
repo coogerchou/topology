@@ -11,7 +11,7 @@ import numpy as np
 from scour import scour
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = 'your_secret_key'  # 设置会话密钥
+#app.secret_key = 'your_secret_key'  # 设置会话密钥
 
 
 # 主页路由
@@ -19,8 +19,8 @@ app.secret_key = 'your_secret_key'  # 设置会话密钥
 
 #path_template = os.path.join('','custom_icon')
 
-def index():
-    return render_template('/index.html')  # 渲染前端页面
+def home():
+    return render_template('index.html')  # 渲染前端页面
 
 # 提交路由
 @app.route('/submit', methods=['POST'])
