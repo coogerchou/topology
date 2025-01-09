@@ -16,8 +16,11 @@ app.secret_key = 'your_secret_key'  # 设置会话密钥
 
 # 主页路由
 @app.route('/')
+
+#path_template = os.path.join('','custom_icon')
+
 def index():
-    return render_template('index.html')  # 渲染前端页面
+    return render_template('/index.html')  # 渲染前端页面
 
 # 提交路由
 @app.route('/submit', methods=['POST'])
