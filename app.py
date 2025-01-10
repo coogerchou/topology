@@ -4,11 +4,12 @@ from flask import Flask, jsonify, render_template, request, send_file, render_te
 import io
 from diagrams import Diagram, Cluster, Edge, Node
 from diagrams.custom import Custom
-from diagrams.aws.compute import EC2
+#from diagrams.aws.compute import EC2
 from graphviz import Source
 import pandas as pd
 import numpy as np
 from scour import scour
+import logging
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 #app.secret_key = 'your_secret_key'  # 设置会话密钥
@@ -20,6 +21,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 #path_template = os.path.join('','custom_icon')
 
 def home():
+    app.logger.info('Index function is called')
     return render_template('index.html')  # 渲染前端页面
 
 # 提交路由
@@ -91,16 +93,17 @@ def generate_images(user_input):
     path_icon = os.path.join('static', 'custom_icon')
 
     global_node_attrs = {
-    "fontsize": "11",  # 字体大小
-    "width": "0.9",    # 节点宽度
-    "height": "0.9",   # 节点高度
-    "fixedsize": "true"  # 固定大小
+        "fontsize": "11",  # 字体大小
+        "width": "0.9",    # 节点宽度
+        "height": "0.9",   # 节点高度
+        "fixedsize": "true"  # 固定大小
     }
 
     graph_attrs = {
         "size": "12,12",  # 图表的最大尺寸 (宽度, 高度) 单位为英寸
         "dpi": "500",   # 每英寸点数，影响图像质量
-        "ratio": "0.9"  # 自动调整比例以适应给定的 size
+        "ratio": "0.9",  # 自动调整比例以适应给定的 size
+        "fontname": "Source Han Sans CN"
     }
     
     def draw_element(df, name_zone, is_visible='visible'):
@@ -240,4 +243,4 @@ def generate_images(user_input):
 #    return "No SVG data found."
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9000)
+    app.run(host='0.0.0.0', port=8000)

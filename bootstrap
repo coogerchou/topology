@@ -18,4 +18,4 @@ pip install -r requirements.txt
 
 # 启动应用
 echo "Starting Flask application..."
-gunicorn app:app -b 0.0.0.0:9000
+gunicorn app:app -b 0.0.0.0:8000
