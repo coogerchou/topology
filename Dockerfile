@@ -64,10 +64,10 @@ COPY . .
 
 # 设置环境变量
 ENV FLASK_APP=app.py
-ENV FLASK_DEBUG=1
+ENV FLASK_DEBUG=0
 
 # 暴露端口
-EXPOSE 8000
+EXPOSE 80
 
 # 使用 gunicorn 启动应用
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:app"]
