@@ -3,6 +3,7 @@
 FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/python:3.9-slim-linuxarm64
 #FROM python:3.9
 
+
 # 安装系统依赖
 #RUN apt-get update && \
 #    apt-get install -y --no-install-recommends \
