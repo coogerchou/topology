@@ -52,7 +52,6 @@ COPY requirements_conda.txt .
 # 安装依赖 - pip
 RUN pip install --no-cache-dir -r requirements_pip.txt
 
-
 RUN conda install -c conda-forge python-graphviz python=3.9
 
 
