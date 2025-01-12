@@ -56,6 +56,10 @@ RUN conda install -c conda-forge python-graphviz python=3.9
 # 安装 gunicorn
 #RUN pip install --no-cache-dir gunicorn
 
+# 清理 Conda 缓存和不需要的文件
+RUN conda clean -a -y && \
+    rm -rf /opt/conda/pkgs/*
+
 # 复制应用代码
 COPY . .
 
