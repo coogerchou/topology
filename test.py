@@ -1,77 +1,32 @@
-import base64
-import datetime
-import os
-from flask import Flask, jsonify, render_template, request, send_file, render_template_string, session, send_from_directory
-import io
 from diagrams import Diagram, Cluster, Edge, Node
 from diagrams.custom import Custom
-#from diagrams.aws.compute import EC2
-from graphviz import Source
+from diagrams.aws.compute import EC2
 import pandas as pd
 import numpy as np
 from scour import scour
-import logging
+from graphviz import Source
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
-#app.secret_key = 'your_secret_key'  # 设置会话密钥
+path_root = '/Users/guannanzhou/Desktop/工作/09.解决方案/03.adhoc/06.AI/topology/'
+name_file = 'topology-entry.xlsx'
+folder_icon = 'custom_icon/'
 
-# 主页路由
-@app.route('/')
-
-#path_template = os.path.join('','custom_icon')
-
-def home():
-    app.logger.info('Index function is called')
-    return render_template('index.html')  # 渲染前端页面
-
-# 提交路由
-@app.route('/submit', methods=['POST'])
-def submit():
-    data = request.json  # 获取前端提交的数据
-
-    # 处理数据
-    combinations = []
-    for key, value in data.items():
-        if key.startswith('product_'):
-            index = key.split('_')[1]
-            product = value
-            location = data.get(f'location_{index}')
-            combinations.append((product, location))
-    print(combinations)
-
-    # 生成图片
-    png_data, svg_filename = generate_images(combinations)
-
-   # 返回结果
-    return jsonify({
-        'status': 'success',
-        'png_image': base64.b64encode(png_data).decode('utf-8'),  # Base64 编码的 PNG 图片
-        'svg_download_url': f'{svg_filename}'
-    })
-
-# 下载路由
-@app.route('/<filename>')
-def download(filename):
-    return send_from_directory('', filename, as_attachment=True)
-
-# 你的生成图片函数
-def generate_images(user_input):
-    excel_path = os.path.join('data', 'topology-entry.xlsx')
-    print(excel_path)
-
-    def get_df(excel_path):
+def draw(name='', path_root='', name_file='', folder_icon=''):
+    
+    path_icon = path_root+folder_icon
+    
+    def get_df(path_root, name_file):
         
         #处理数据
         ##读取基础库
-        df_mapping = pd.read_excel(excel_path, sheet_name='Product')
+        df_mapping = pd.read_excel(path_root+name_file, sheet_name='Product')
         df_mapping = df_mapping[df_mapping.columns[1:]]
 
         ##筛选必有的 node
         df_default = df_mapping[df_mapping['default'] == 'y']
 
         ##读取用户输入
-        df_input_raw = pd.DataFrame(user_input,columns=['Product','Zone'])
-        #df_input_raw = df_input_raw[df_input_raw.columns[1:]]
+        df_input_raw = pd.read_excel(path_root+name_file)
+        df_input_raw = df_input_raw[df_input_raw.columns[1:]]
 
         ##把用户输入的内容，基于基础库 mapping 扩展
         df_input = pd.merge(df_input_raw, df_mapping[df_mapping.columns[:-2]], on='Product', how='left')
@@ -93,34 +48,31 @@ def generate_images(user_input):
     
         return df_input
     
-    df = get_df(excel_path)
-
-    path_icon = os.path.join('static', 'custom_icon')
+    df = get_df(path_root, name_file)
+    
 
     global_node_attrs = {
-        "fontsize": "11",  # 字体大小
-        "width": "0.9",    # 节点宽度
-        "height": "0.9",   # 节点高度
-        "fixedsize": "true"  # 固定大小
+    "fontsize": "11",  # 字体大小
+    "width": "0.9",    # 节点宽度
+    "height": "0.9",   # 节点高度
+    "fixedsize": "true"  # 固定大小
     }
 
     graph_attrs = {
         "size": "12,12",  # 图表的最大尺寸 (宽度, 高度) 单位为英寸
         "dpi": "500",   # 每英寸点数，影响图像质量
-        "ratio": "0.9",  # 自动调整比例以适应给定的 size
-        "fontname": "Source Han Sans CN"
+        "ratio": "0.9"  # 自动调整比例以适应给定的 size
     }
     
     def draw_element(df, name_zone, is_visible='visible'):
-        #print('--', name_zone, '--')
+        print('--', name_zone, '--')
         df_temp = df[df['Zone']==name_zone]
         list_product = df_temp['Product'].to_list()
         list_icon_used = df_temp['icon-used'].to_list()
         
         df_temp_core = df_temp[df_temp['Core']=='y']
         if len(df_temp_core) > 0:
-            #print(path_icon+df_temp_core['icon-used'])
-            core = Custom(df_temp_core['Product'].to_list()[0], path_icon+'/'+df_temp_core['icon-used'].to_list()[0])
+            core = Custom(df_temp_core['Product'].to_list()[0], path_icon+df_temp_core['icon-used'].to_list()[0])
             core_product_name = df_temp_core['Product'].to_list()[0]
         else:
             core = ''
@@ -131,35 +83,35 @@ def generate_images(user_input):
         
         #把非 core 的生成对象，每 2 个一组
         for i in range(len(list_product)):
-            #print("i", i)
-            #print('list_product', list_product)
-            #print('core', core_product_name)
-            #print(list_product[i], list_icon_used[i])
+            print("i", i)
+            print('list_product', list_product)
+            print('core', core_product_name)
+            print(list_product[i], list_icon_used[i])
             
             if list_product[i] != core_product_name: #
-                #print('绘制') #
-                products_sub.append(Custom(list_product[i], path_icon+'/'+list_icon_used[i])) #
+                print('绘制') #
+                products_sub.append(Custom(list_product[i], path_icon+list_icon_used[i])) #
             
             if (len(products_sub) == 2) or (i == len(list_product)-1): #
                 products.append(products_sub) #
                 products_sub = [] #
 
-            #print('products', products)
+            print('products', products)
             
-        #print('len(products)', len(products))
+        print('len(products)', len(products))
         
         #把没有 core 的都连起来
         if core_product_name == '':
             for products_sub in products:
                 for j in range(len(products_sub)):
-                    #print("j", j)
+                    print("j", j)
                     if j > 0:
-                        #print(is_visible)
+                        print(is_visible)
                         if is_visible == 'visible':
                             products_sub[j] - products_sub[j-1]
                         else:
                             products_sub[j] - Edge(style="invis") - products_sub[j-1]
-                            #print('虚线了')
+                            print('虚线了')
             for l in range(len(products)):
                 if l > 0:
                     products[j][-1] - Edge(style="invis") - products[j-1][0]
@@ -170,7 +122,7 @@ def generate_images(user_input):
         #    for products_sub in products:
         #        core - Edge(constraint='false') - products_sub
         if (core != '') and (is_visible != 'visible'):
-            #print('有 Core ！！！！', core, '但 invisible')
+            print('有 Core ！！！！', core, '但 invisible')
             for products_sub in products:
                 core - Edge(style = 'invis', constraint='false') - products_sub
         if (core != '') and (is_visible == 'visible'):
@@ -181,8 +133,10 @@ def generate_images(user_input):
 
 
     
-    with Diagram('', show=False, filename=None, direction="LR", graph_attr=graph_attrs,\
-                 node_attr=global_node_attrs, outformat=["png", "svg"]) as pic:
+    #with Diagram(name, show=False, filename=None, direction="LR", graph_attr=graph_attrs,\
+    #             node_attr=global_node_attrs, outformat=["png","svg"]) as pics:
+    with Diagram(name, show=False, filename=None, direction="LR", graph_attr=graph_attrs,\
+                 node_attr=global_node_attrs,outformat=["png","svg"]) as pic:
 
         with Cluster('互联网'):
             internet = draw_element(df, '互联网', is_visible='visible')[0]
@@ -209,6 +163,7 @@ def generate_images(user_input):
                         #switch - SOC
                         for secs_sub in secs:
                             switch - secs_sub
+                        
         
             with Cluster('网络周界'):
                     with Cluster('DMZ'):
@@ -218,47 +173,44 @@ def generate_images(user_input):
                             DMZ_sub - switch
         
         internet - Edge(style="dashed") - firewall
-        
-        # 获取生成的 DOT 源码
-        dot_source = str(pic)
-        dot_source = dot_source.replace(
-            "digraph {",
-            'digraph {\n    size="10,10";',  # 设置图像尺寸为 10x10 英寸
-        )
 
-        # 使用 graphviz 的 Source 类生成图像
-        source = Source(dot_source)
+    #options = {
+    #    'enable_id_stripping': True,  # 禁用ID剥离
+    #    'strip_xml_prolog': False,
+    #    'remove_descriptive_elements': False,
+        # 根据需要设置其他选项...
+    #}
 
-        # 捕获 PNG 数据
-        png_data = source.pipe(format='png')
-
-        # 捕获 SVG 数据
-        #svg_data = source.pipe(format='svg')
-        #svg_data = scour.scourString(source.pipe(format='svg'))
-
-        #svg_data.dot.renderer = "cairo"
         #pic.dot.renderer = 'cairo'
-
-        #timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    svg_filename = 'diagrams_image.svg'
-    svg_path = os.path.join('', svg_filename)
-    with open(svg_path, "rt") as f:
+    
+    with open(path_root+'topology_app/'+'diagrams_image.svg', "rt") as f:
         in_string = f.read()
         out_string = scour.scourString(in_string) #, options
 
-    with open(svg_path, "wt") as f:
+    with open(path_root+'topology_app/'+'diagrams_image.svg', "wt") as f:
         f.write(out_string)
+    
+    #pic.dot.renderer = "cairo"
+    
+    # 获取生成的 DOT 源码
+    #dot_source = str(pic)
 
-    return png_data, svg_filename
+    #dot_source = dot_source.replace(
+    #"digraph {",
+    #'digraph {\n    size="10,10";',  # 设置图像尺寸为 10x10 英寸
+    #)
 
-# 下载 SVG 路由
-#@app.route('/download/svg')
-#def download_svg():
-#    svg_data = session.get('svg_data')
-#    if svg_data:
-#        return send_file(io.BytesIO(svg_data), mimetype='image/svg+xml', as_attachment=True, download_name='plot.svg')
-#    return "No SVG data found."
+    # 使用 graphviz 的 Source 类生成图像
+    #source = Source(dot_source)
 
-if __name__ == '__main__':
-#    app.run(host='0.0.0.0', port=80)
-    app.run(debug=True)
+    # 捕获 PNG 数据
+    #png_data = source.pipe(format='png')
+
+    # 捕获 SVG 数据
+    #svg_data = scour.scourString(source.pipe(format='svg'),options)
+
+    
+    return pic
+        
+draw('', path_root, name_file, folder_icon)
+#png_data, svg_data = draw('', path_root, name_file, folder_icon)

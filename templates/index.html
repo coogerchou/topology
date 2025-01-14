@@ -5,43 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>产品与部署位置选择</title>
     <style>
-        .combination {
-            margin-bottom: 10px;
+        /* 整体布局 */
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
         }
-        .combination select {
-            margin-right: 10px;
+
+        /* 左侧表单区域 */
+        .form-container {
+            flex: 1;
+            max-width: 30%;
         }
-        #add-combination {
-            margin-bottom: 20px;
-        }
-        #result {
-            margin-top: 20px;
-        }
-        #image-container {
+
+        /* 右侧图片区域 */
+        .image-container {
+            flex: 1;
+            max-width: 70%;
             border: 1px solid #ccc;
             padding: 10px;
             text-align: center;
         }
+
+        /* 组合样式 */
+        .combination {
+            margin-bottom: 1px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .combination select {
+            margin-right: 10px;
+        }
+
+        /* 删除按钮样式 */
+        .delete-combination {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .delete-combination:hover {
+            background-color: #cc0000;
+        }
+
+        /* 图片样式 */
         #image-container img {
-            max-width: 100%;
+            max-width: 95%; /* 图片最大宽度为容器的 95% */
+            max-height: 800px; /* 图片最大高度为 800px */
+            width: auto; /* 保持图片的宽高比 */
+            height: auto; /* 保持图片的宽高比 */
+            display: block; /* 使图片居中 */
+            margin: 0 auto; /* 使图片居中 */
+        }
+
+        /* 图片占位符 */
+        #image-placeholder {
+            margin: 0;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* 提示信息样式 */
+        #hint-container {
+            margin-bottom: 20px;
+        }
+
+        #hint-container h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        #hint-container p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            text-align: left; /* 左对齐 */
+        }
+
+        /* 下载按钮样式 */
+        #download-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #download-button:hover {
+            background-color: #45a049;
+        }
+
+        /* 竖屏布局（屏幕宽度小于 768px 时） */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* 上下布局 */
+            }
+
+            .form-container,
+            .image-container {
+                max-width: 100%; /* 宽度占满整个屏幕 */
+            }
         }
     </style>
 </head>
 <body>
-    <h1>选择产品与部署位置</h1>
-    <form id="combination-form" method="post">
-        <div id="combinations-container">
-            <!-- 动态添加的组合会插入到这里 -->
+    <h2>·  选择产品与部署位置</h2>
+    <div class="container">
+        <!-- 左侧表单区域 -->
+        <div class="form-container">
+            <form id="combination-form" method="post">
+                <div id="combinations-container">
+                    <!-- 动态添加的组合会插入到这里 -->
+                </div>
+                <button type="button" id="add-combination">添加组合</button>
+                <button type="submit">提交</button>
+            </form>
         </div>
-        <button type="button" id="add-combination">添加组合</button>
-        <button type="submit">提交</button>
-    </form>
 
-    <!-- 用于显示 PNG 图片的区域 -->
-    <div id="result">
-        <h2>生成的 PNG 图片</h2>
-        <div id="image-container">
-            <p>图片将在此处显示</p>
+        <!-- 右侧图片区域 -->
+        <div class="image-container">
+            <!-- 提示信息 -->
+            <div id="hint-container" style="display: none;">
+                <h4>如无需改动，请直接右键图片另存为；如需改动，请下载 svg 图片，复制到 ppt 中，可在“图形格式”中选择“转换为形状”即可编辑</h4>
+                <p>注：ppt 中 svg 转换为形状后，需等比例缩小，以及额外在“开始”中选择“居中文字”</p>
+            </div>
+
+            <!-- 下载按钮 -->
+            <button id="download-button" style="display: none;">下载 SVG 图片</button>
+
+            <!-- 图片容器 -->
+            <div id="image-container">
+                <p id="image-placeholder">图片将在此处显示</p>
+            </div>
         </div>
     </div>
 
@@ -92,14 +199,14 @@
             });
 
             // 删除按钮
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'delete-combination';
-        deleteButton.textContent = '删除';
-        deleteButton.addEventListener('click', () => {
-            container.removeChild(combination);  // 删除组合
-            combinationCount--;  // 更新组合计数
-        });
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'delete-combination';
+            deleteButton.textContent = '删除';
+            deleteButton.addEventListener('click', () => {
+                container.removeChild(combination);
+                combinationCount--;
+            });
 
             combination.appendChild(productSelect);
             combination.appendChild(locationSelect);
@@ -112,6 +219,16 @@
         // 提交表单
         document.getElementById('combination-form').addEventListener('submit', (event) => {
             event.preventDefault();
+
+            if (combinationCount === 0) {
+                alert('请至少添加一个组合！');
+                return;
+            }
+
+            const submitButton = document.querySelector('#combination-form button[type="submit"]');
+            submitButton.textContent = '提交中...';
+            submitButton.disabled = true;
+
             const formData = new FormData(event.target);
             const data = {};
 
@@ -130,21 +247,38 @@
             .then(response => response.json())
             .then(result => {
                 if (result.status === 'success') {
-                    // 清空图片容器
                     const imageContainer = document.getElementById('image-container');
-                    imageContainer.innerHTML = '';  // 清空内容
-
-                    // 创建并插入 PNG 图片
+                    const imagePlaceholder = document.getElementById('image-placeholder');
+                    if (imagePlaceholder) {
+                        imagePlaceholder.style.display = 'none';
+                    }
+                    imageContainer.innerHTML = '';
                     const pngImage = document.createElement('img');
-                    pngImage.src = `data:image/png;base64,${result.png_image}`;  // 设置 src 属性
-                    pngImage.style.maxWidth = '100%';  // 设置图片样式
-                    imageContainer.appendChild(pngImage);  // 插入图片
+                    pngImage.src = `data:image/png;base64,${result.png_image}`;
+                    pngImage.style.maxWidth = '95%';
+                    pngImage.style.maxHeight = '800px';
+                    imageContainer.appendChild(pngImage);
+
+                    // 显示提示信息
+                    const hintContainer = document.getElementById('hint-container');
+                    hintContainer.style.display = 'block';
+
+                    // 显示下载按钮并设置下载链接
+                    const downloadButton = document.getElementById('download-button');
+                    downloadButton.style.display = 'block';
+                    downloadButton.onclick = () => {
+                        window.location.href = result.svg_download_url;
+                    };
                 } else {
                     alert('提交失败！');
                 }
             })
             .catch(error => {
                 console.error('提交失败:', error);
+            })
+            .finally(() => {
+                submitButton.textContent = '提交';
+                submitButton.disabled = false;
             });
         });
     </script>
