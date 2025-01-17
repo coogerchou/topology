@@ -55,7 +55,7 @@
         }
 
         /* 图片样式 */
-        #image-container img {
+        .image-container img {
             max-width: 95%; /* 图片最大宽度为容器的 95% */
             max-height: 800px; /* 图片最大高度为 800px */
             width: auto; /* 保持图片的宽高比 */
@@ -65,25 +65,25 @@
         }
 
         /* 图片占位符 */
-        #image-placeholder {
+        .image-placeholder {
             margin: 0;
             font-style: italic;
             color: #888;
         }
 
         /* 提示信息样式 */
-        #hint-container {
+        .hint-container {
             margin-bottom: 20px;
         }
 
-        #hint-container h4 {
+        .hint-container h4 {
             font-size: 16px;
             color: #333;
             margin-bottom: 10px;
             text-align: left;
         }
 
-        #hint-container p {
+        .hint-container p {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
@@ -91,7 +91,7 @@
         }
 
         /* 下载按钮样式 */
-        #download-button {
+        .download-button {
             margin-top: 10px;
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -103,7 +103,7 @@
             transition: background-color 0.3s ease;
         }
 
-        #download-button:hover {
+        .download-button:hover {
             background-color: #45a049;
         }
 
@@ -136,29 +136,34 @@
 
         <!-- 右侧图片区域 -->
         <div class="image-container">
-            <!-- 提示信息 -->
-            <div id="hint-container" style="display: none;">
-                <h4>如无需改动，请直接右键图片另存为；如需改动，请下载 svg 图片，复制到 ppt 中，可在“图形格式”中选择“转换为形状”即可编辑</h4>
-                <p>注：ppt 中 svg 转换为形状后，需等比例缩小，以及额外在“开始”中选择“居中文字”</p>
+            <!-- 第一张图：核心交换机连接 -->
+            <div class="hint-container" id="core-switch-hint" style="display: none;">
+                <h4>核心交换机连接图</h4>
+                <p>如无需改动，请直接右键图片另存为；如需改动，请下载 SVG 图片，复制到 PPT 中，可在“图形格式”中选择“转换为形状”即可编辑。</p>
+            </div>
+            <button class="download-button" id="download-core-switch" style="display: none;">下载核心交换机连接图</button>
+            <div id="core-switch-image-container">
+                <p class="image-placeholder">核心交换机连接图将在此处显示</p>
             </div>
 
-            <!-- 下载按钮 -->
-            <button id="download-button" style="display: none;">下载 SVG 图片</button>
-
-            <!-- 图片容器 -->
-            <div id="image-container">
-                <p id="image-placeholder">图片将在此处显示</p>
+            <!-- 第二张图：关系图 -->
+            <div class="hint-container" id="relationship-hint" style="display: none;">
+                <h4>关系图</h4>
+                <p>如无需改动，请直接右键图片另存为；如需改动，请下载 SVG 图片，复制到 PPT 中，可在“图形格式”中选择“转换为形状”即可编辑。</p>
+            </div>
+            <button class="download-button" id="download-relationship" style="display: none;">下载关系图</button>
+            <div id="relationship-image-container">
+                <p class="image-placeholder">关系图将在此处显示</p>
             </div>
         </div>
     </div>
 
     <script>
         const products = [
-            "WAF", "天擎-终端安全-EPP/EDR", "椒图-主机安全", "NGSOC-安全运营平台", 
-            "天眼-流量探针", "准入-NAC", "天眼-沙箱", "威胁情报-TIP", "SOAR", 
-            "SWG-安全代理网关", "NBM-上网行为管理", "代码安全", "NGFW", "IDS", "IPS", 
-            "邮件服务器", "邮件安全网关", "数据库", "核心交换机", "云", "云服务", 
-            "云查杀", "电脑", "笔记本", "网关", "防火墙", "服务器", "天擎客户端", "漏扫"
+            'WAF','SOAR','天擎-终端安全-EPP/EDR','椒图-主机安全','NGSOC-安全运营平台','天眼-流量探针',
+            '准入-NAC','天眼-沙箱','威胁情报-TIP','SWG-安全代理网关','NBM-上网行为管理','代码安全','NGFW',
+            'IDS','IPS','邮件威胁检测系统','数据库','核心交换机','云','云服务','云查杀','电脑','笔记本',
+            '网关','防火墙','服务器','天擎客户端','漏扫'
         ];
 
         const locations = [
@@ -247,27 +252,44 @@
             .then(response => response.json())
             .then(result => {
                 if (result.status === 'success') {
-                    const imageContainer = document.getElementById('image-container');
-                    const imagePlaceholder = document.getElementById('image-placeholder');
-                    if (imagePlaceholder) {
-                        imagePlaceholder.style.display = 'none';
+                    // 显示核心交换机连接图
+                    const coreSwitchImageContainer = document.getElementById('core-switch-image-container');
+                    const coreSwitchPlaceholder = coreSwitchImageContainer.querySelector('.image-placeholder');
+                    if (coreSwitchPlaceholder) {
+                        coreSwitchPlaceholder.style.display = 'none';
                     }
-                    imageContainer.innerHTML = '';
-                    const pngImage = document.createElement('img');
-                    pngImage.src = `data:image/png;base64,${result.png_image}`;
-                    pngImage.style.maxWidth = '95%';
-                    pngImage.style.maxHeight = '800px';
-                    imageContainer.appendChild(pngImage);
+                    coreSwitchImageContainer.innerHTML = '';
+                    const coreSwitchPngImage = document.createElement('img');
+                    coreSwitchPngImage.src = `data:image/png;base64,${result.core_switch_png_image}`;
+                    coreSwitchPngImage.style.maxWidth = '95%';
+                    coreSwitchPngImage.style.maxHeight = '800px';
+                    coreSwitchImageContainer.appendChild(coreSwitchPngImage);
 
-                    // 显示提示信息
-                    const hintContainer = document.getElementById('hint-container');
-                    hintContainer.style.display = 'block';
+                    // 显示关系图
+                    const relationshipImageContainer = document.getElementById('relationship-image-container');
+                    const relationshipPlaceholder = relationshipImageContainer.querySelector('.image-placeholder');
+                    if (relationshipPlaceholder) {
+                        relationshipPlaceholder.style.display = 'none';
+                    }
+                    relationshipImageContainer.innerHTML = '';
+                    const relationshipPngImage = document.createElement('img');
+                    relationshipPngImage.src = `data:image/png;base64,${result.relationship_png_image}`;
+                    relationshipPngImage.style.maxWidth = '95%';
+                    relationshipPngImage.style.maxHeight = '800px';
+                    relationshipImageContainer.appendChild(relationshipPngImage);
 
-                    // 显示下载按钮并设置下载链接
-                    const downloadButton = document.getElementById('download-button');
-                    downloadButton.style.display = 'block';
-                    downloadButton.onclick = () => {
-                        window.location.href = result.svg_download_url;
+                    // 显示提示信息和下载按钮
+                    document.getElementById('core-switch-hint').style.display = 'block';
+                    document.getElementById('relationship-hint').style.display = 'block';
+                    document.getElementById('download-core-switch').style.display = 'block';
+                    document.getElementById('download-relationship').style.display = 'block';
+
+                    // 设置下载链接
+                    document.getElementById('download-core-switch').onclick = () => {
+                        window.location.href = result.core_switch_svg_download_url;
+                    };
+                    document.getElementById('download-relationship').onclick = () => {
+                        window.location.href = result.relationship_svg_download_url;
                     };
                 } else {
                     alert('提交失败！');
