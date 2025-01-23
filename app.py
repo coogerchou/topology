@@ -37,7 +37,7 @@ def submit():
             product = value
             location = data.get(f'location_{index}')
             combinations.append((product, location))
-    print(combinations)
+    #print(combinations)
 
     # 生成图片
     (
@@ -61,7 +61,7 @@ def download(filename):
 # 你的生成图片函数
 def generate_images(user_input):
     excel_path = os.path.join('data', 'topology-entry.xlsx')
-    print(excel_path)
+    #print(excel_path)
 
     def get_df(excel_path):
         # 处理数据
@@ -133,6 +133,11 @@ def generate_images(user_input):
         "rankdir": "LR"   # 从左到右布局
     }
 
+    edge_attrs = {
+        'fontsize':'10',
+        'fontcolor':'red'
+    }
+
     def draw_element(df, name_zone, is_visible='visible', group_size=2):
         df_temp = df[df['Zone'] == name_zone]
         list_product = df_temp['Product'].to_list()
@@ -149,16 +154,16 @@ def generate_images(user_input):
         # 将节点分组，每组最多 group_size 个节点
         groups = [list_product[i:i + group_size] for i in range(0, len(list_product), group_size)]
 
-        if name_zone in ['安全管理区']:
-            print('groups:', groups)
+        #if name_zone in ['安全管理区']:
+        #    print('groups:', groups)
             # 在每组内部横向排列节点
-            for group in groups:
-                for i in range(1, len(group)):
-                    nodes_cluster[group[i]] - Edge(style='invis', constraints='false') - nodes_cluster[group[i - 1]]
+        #    for group in groups:
+        #        for i in range(1, len(group)):
+        #            nodes_cluster[group[i]] - Edge(style='invis', constraints='false') - nodes_cluster[group[i - 1]]
 
             # 在组与组之间纵向排列
-            for i in range(1, len(groups)):
-                nodes_cluster[groups[i][0]] - Edge(style='invis', constraints='false') - nodes_cluster[groups[i - 1][0]]
+        #    for i in range(1, len(groups)):
+        #        nodes_cluster[groups[i][0]] - Edge(style='invis', constraints='false') - nodes_cluster[groups[i - 1][0]]
         
         # 对电脑和服务器，横向连接
         list_zone_lateral = ['业务应用区', '园区网']
@@ -225,11 +230,11 @@ def generate_images(user_input):
             # 连接所有节点
             all_nodes = {**internet, **office, **servers, **secs, **switch_secs, **DMZ}
             for sender, receiver, label, edge_attrs in relationships:
-                print(sender)
+                #print(sender)
                 #print(all_nodes(sender))
                 sender_node = all_nodes[sender]
                 receiver_node = all_nodes[receiver]
-                edge = Edge(xlabel=label, style=edge_style_data)
+                edge = Edge(xlabel=label, style=edge_style_data, fontsize='11')
                 sender_node >> edge >> receiver_node
         return pic
     

@@ -6,34 +6,60 @@
     <title>产品与部署位置选择</title>
     <style>
         /* 整体布局 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 顶部标题固定 */
+        h2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            padding: 10px 20px;
+            margin: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        /* 主容器 */
         .container {
             display: flex;
-            gap: 20px;
-            padding: 20px;
+            margin-top: 60px; /* 为标题留出空间 */
+            height: calc(100vh - 60px); /* 视口高度减去标题高度 */
         }
 
-        /* 左侧表单区域 */
+        /* 左侧表单区域固定 */
         .form-container {
-            flex: 1;
-            max-width: 30%;
+            flex: 0 0 30%; /* 固定宽度为 30% */
+            min-width: 340px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* 如果表单内容过多，可以滚动 */
+            position: fixed;
+            height: calc(100vh - 60px); /* 视口高度减去标题高度 */
         }
 
-        /* 右侧图片区域 */
+        /* 右侧图片区域滚动 */
         .image-container {
             flex: 1;
-            max-width: 70%;
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
+            margin-left: 30%; /* 左侧表单区域的宽度 */
+            padding: 20px;
+            overflow-y: auto; /* 允许滚动 */
+            height: calc(100vh - 60px); /* 视口高度减去标题高度 */
         }
 
         /* 组合样式 */
         .combination {
-            margin-bottom: 1px;
+            margin-bottom: 5px;
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #f9f9f9;
+            background-color: #fff;
         }
 
         .combination select {
@@ -56,12 +82,12 @@
 
         /* 图片样式 */
         .image-container img {
-            max-width: 95%; /* 图片最大宽度为容器的 95% */
-            max-height: 800px; /* 图片最大高度为 800px */
-            width: auto; /* 保持图片的宽高比 */
-            height: auto; /* 保持图片的宽高比 */
-            display: block; /* 使图片居中 */
-            margin: 0 auto; /* 使图片居中 */
+            max-width: 95%;
+            max-height: 800px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
 
         /* 图片占位符 */
@@ -87,7 +113,7 @@
             font-size: 14px;
             color: #666;
             margin-top: 5px;
-            text-align: left; /* 左对齐 */
+            text-align: left;
         }
 
         /* 下载按钮样式 */
@@ -110,18 +136,31 @@
         /* 竖屏布局（屏幕宽度小于 768px 时） */
         @media (max-width: 768px) {
             .container {
-                flex-direction: column; /* 上下布局 */
+                flex-direction: column;
+                margin-top: 0;
             }
 
-            .form-container,
+            .form-container {
+                position: static;
+                width: 100%;
+                margin-left: 0;
+                height: auto;
+            }
+
             .image-container {
-                max-width: 100%; /* 宽度占满整个屏幕 */
+                margin-left: 0;
+                height: auto;
+            }
+
+            h2 {
+                position: static;
+                box-shadow: none;
             }
         }
     </style>
 </head>
 <body>
-    <h2>·  选择产品与部署位置，将得到部署图和数据流图</h2>
+    <h2>· 选择产品与部署位置，将得到部署图和数据流图</h2>
     <div class="container">
         <!-- 左侧表单区域 -->
         <div class="form-container">
