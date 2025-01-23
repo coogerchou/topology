@@ -100,6 +100,21 @@ def generate_images(user_input):
     df = get_df(excel_path)
     path_icon = os.path.join('static', 'custom_icon/')
 
+    # 定义 label 到 edge_attrs 的映射
+    EDGE_ATTRS_MAPPING = {
+        #"告警/日志": {"color": "gray25"},
+        #"告警/日志": {"color": "gray25"},
+        "指令": {"color": "firebrick4","fontcolor":"firebrick4"},
+        "情报": {"color": "darkgreen","fontcolor": "darkgreen"},
+        "策略下发": {"color": "firebrick4","fontcolor":"firebrick4"},
+        #"还原文件": {"color": "red", "style": "dotted", "fontcolor": "red"},
+        #"执行结果": {"color": "red", "style": "dotted", "fontcolor": "red"},
+        "资产/漏洞": {"color": "gray19","fontcolor": "gray19"},
+        #"设备认证": {"color": "red", "style": "dotted", "fontcolor": "red"},
+        #"文件样本": {"color": "red", "style": "dotted", "fontcolor": "red"},
+    # 添加更多映射规则
+    }
+
     def get_relationship(df):
         relationships = []
         list_unwanted_columns = ['icon-blue', 'icon-red', 'default', 'Zone', 'Core', 'icon-used']
@@ -113,14 +128,16 @@ def generate_images(user_input):
                 if receiver == "Product":  # 跳过 "Node" 列
                     continue
                 if str(label) != 'nan' and sender != receiver and receiver in list_product_all:
-                    relationships.append((sender, receiver, label, {}))
+                    # 根据 label 获取 edge_attrs
+                    edge_attrs = EDGE_ATTRS_MAPPING.get(label, {})  # 如果 label 不在映射中，返回空字典
+                    relationships.append((sender, receiver, label, edge_attrs))
         return relationships
 
     relationships = get_relationship(df)
     print(relationships)
 
     global_node_attrs = {
-        "fontsize": "11",  # 字体大小
+        "fontsize": "12",  # 字体大小
         "width": "0.9",    # 节点宽度
         "height": "0.9",   # 节点高度
         "fixedsize": "true"  # 固定大小
@@ -130,12 +147,11 @@ def generate_images(user_input):
         "size": "12,12",  # 图表的最大尺寸 (宽度, 高度) 单位为英寸
         "dpi": "500",     # 每英寸点数，影响图像质量
         "ratio": "0.9",   # 自动调整比例以适应给定的 size
-        "rankdir": "LR"   # 从左到右布局
+        "rankdir": "LR",   # 从左到右布局
     }
 
-    edge_attrs = {
-        'fontsize':'10',
-        'fontcolor':'red'
+    graph_attrs_cluster = {
+        "fontsize":"15"
     }
 
     def draw_element(df, name_zone, is_visible='visible', group_size=2):
@@ -181,26 +197,26 @@ def generate_images(user_input):
         with Diagram('diagram_'+type_graph, show=False, filename=None, direction="LR", graph_attr=graph_attrs,
                     node_attr=global_node_attrs, outformat=['png','svg']) as pic:
 
-            with Cluster('互联网'):
+            with Cluster('互联网', graph_attr=graph_attrs_cluster):
                 internet = draw_element(df, '互联网', is_visible='invisible')
 
-            with Cluster('企业网络'):
-                with Cluster('网络周界'):
-                    with Cluster('DMZ'):
+            with Cluster('企业网络', graph_attr=graph_attrs_cluster):
+                with Cluster('网络周界', graph_attr=graph_attrs_cluster):
+                    with Cluster('DMZ', graph_attr=graph_attrs_cluster):
                         DMZ = draw_element(df, 'DMZ', is_visible='invisible')
 
-                with Cluster('内部网络'):
-                    with Cluster('交换区'):
+                with Cluster('内部网络', graph_attr=graph_attrs_cluster):
+                    with Cluster('交换区', graph_attr=graph_attrs_cluster):
                         switch_secs = draw_element(df, '交换区', is_visible='invisible')
 
-                    with Cluster('园区网'):
+                    with Cluster('园区网', graph_attr=graph_attrs_cluster):
                         office = draw_element(df, '园区网', is_visible='visible')
 
-                    with Cluster('数据中心'):
-                        with Cluster('安全管理区'):
+                    with Cluster('数据中心', graph_attr=graph_attrs_cluster):
+                        with Cluster('安全管理区', graph_attr=graph_attrs_cluster):
                             secs = draw_element(df, '安全管理区', is_visible='invisible', group_size=2)
 
-                        with Cluster('业务应用区'):
+                        with Cluster('业务应用区', graph_attr=graph_attrs_cluster):
                             servers = draw_element(df, '业务应用区', is_visible='visible')
 
             if type_graph == 'deployment':
@@ -234,7 +250,7 @@ def generate_images(user_input):
                 #print(all_nodes(sender))
                 sender_node = all_nodes[sender]
                 receiver_node = all_nodes[receiver]
-                edge = Edge(xlabel=label, style=edge_style_data, fontsize='11')
+                edge = Edge(xlabel=label, style=edge_style_data, fontsize='11',**edge_attrs, xlp='-5')
                 sender_node >> edge >> receiver_node
         return pic
     
